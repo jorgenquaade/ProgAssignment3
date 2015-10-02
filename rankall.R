@@ -32,45 +32,50 @@ rankall <- function(outcome, num = "best") {
 	## Create vector of states
 	stateVec<-unique(inputData[, 7])
 
+	## order the statevec alphabetically and assign to outputData 
+	stateVec <- sort(stateVec)
+	outputData$state <- stateVec
+
 	## Use a for loop to create dataframe containing state and hospital
 	## chosen from outcome and rank
-outputData$state <- stateVec
-## initialize index into output dataframe outputData
-rownum<-1 
 
-for (i in stateVec) {
+	## initialize index into output dataframe outputData
+	rownum<-1 
+
+	for (i in stateVec) {
 	
-## Subset data according to input parameter state
-	stateData <- subset(inputData, inputData[,7]==i)	
+		## Subset data according to input parameter state
+		stateData <- subset(inputData, inputData[,7]==i)	
 
-	## Now stateData needs to be ordered by rank after mortality rates
-	## but first mortality rates must be converted to numerics
-	stateData[,colnum] <- as.numeric(stateData[,colnum])
+		## Now stateData needs to be ordered by rank after mortality rates
+		## but first mortality rates must be converted to numerics
+		stateData[,colnum] <- as.numeric(stateData[,colnum])
 
-	## Order the rankedData after rate and hospitalname so that we can return the
-	## hospital with the name that comes first alphabetically
-	orderedData <- stateData[order(stateData[,colnum],stateData[,2]),]
+		## Order the rankedData after rate and hospitalname so that we can return the
+		## hospital with the name that comes first alphabetically
+		orderedData <- stateData[order(stateData[,colnum],stateData[,2]),]
 
-	## get the number of hospitals in state
-	numhosp <- length(orderedData[,2])
+		## get the number of hospitals in state
+		numhosp <- length(orderedData[,2])
 
-	if (num == "best"){
-		outputData$hospital[rownum] <- orderedData[1,2]
-		outputData$state[rownum] <- orderedData[1,7]
-	}
-	else if (num == "worst"){
-		orderedData <- stateData[order(stateData[,colnum], stateData[,2], decreasing = TRUE),]
-		outputData$hospital[rownum] <- orderedData[1,2]
-		outputData$state[rownum] <- orderedData[1,7]
-	}
-	else if ( num > 0 & num <= numhosp){
-		outputData$hospital[rownum] <- orderedData[num,2]
-		outputData$state[rownum] <- orderedData[num,7]
-	}
-	else 
-		outputData<-NA
-
-	rownum<-rownum+1
-}	
+		if (num == "best"){
+			outputData$hospital[rownum] <- orderedData[1,2]
+			outputData$state[rownum] <- orderedData[1,7]
+		}
+		else if (num == "worst"){
+			orderedData <- stateData[order(stateData[,colnum], stateData[,2], decreasing = TRUE),]
+			outputData$hospital[rownum] <- orderedData[1,2]
+			outputData$state[rownum] <- orderedData[1,7]
+		}
+		else if ((num > 0) & (num <= numhosp)){
+			outputData$hospital[rownum] <- orderedData[num,2]
+			outputData$state[rownum] <- orderedData[num,7]
+		}
+		else { 
+			outputData$hospital[rownum] <- NA
+			outputData$state[rownum] <- i
+		}
+		rownum<-rownum+1
+	}	
 	outputData
 }
